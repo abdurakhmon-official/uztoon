@@ -1,0 +1,19 @@
+@import "./css/bootstrap.min.css";
+@import "./css/font-awesome.min.css";
+@import "./css/elegant-icons.css";
+@import "./css/plyr.css";
+@import "./css/owl.carousel.min.css";
+@import "./css/slicknav.min.css";
+@import "./css/style.css";
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

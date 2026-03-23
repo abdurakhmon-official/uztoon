@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "api"
+		},
+		{
+			"path": "ui"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			".nuxt": true,
+			"node_modules": true,
+			"package-lock.json": true
+		}
+	}
+}

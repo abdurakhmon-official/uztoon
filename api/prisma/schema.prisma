@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum USER_ROLE {
+  SUPER_ADMIN
+  ADMIN
+  CREATOR
+  CLIENT
+}
+
+model User {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  createdById String?
+  updatedById String?
+
+  username     String    @unique
+  password     String
+  firstName    String
+  lastName     String
+  email        String
+  phone        String?
+  profileImage String?
+  region       String?
+  country      String?
+  role         USER_ROLE @default(CLIENT)
+  active       Boolean   @default(true)
+  deleted      Boolean   @default(false)
+
+  resetToken   String?
+  resetTokenAt DateTime?
+
+  webtoons       Webtoon[]
+  webtoonReviews WebtoonReview[]
+
+  series       Serie[]
+  serieReviews SerieReview[]
+
+  followingWebtoons FollowingWebtoon[]
+  votes             WebtoonVote[]
+
+  @@map("users")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  name   String  @db.VarChar(255)
+  active Boolean @default(true)
+
+  webtoonTags WebtoonTag[]
+  serieTags   SerieTag[]
+
+  @@unique([name])
+  @@map("tags")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  name   String  @db.VarChar(255)
+  active Boolean @default(true)
+
+  webtoons Webtoon[]
+
+  @@unique([name])
+  @@map("categories")
+}
+
+model Webtoon {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  title           String @db.VarChar(255)
+  description     String @db.VarChar(2000)
+  image           String
+  totalSeries     Int    @default(1)
+  availableSeries Int    @default(0)
+
+  active  Boolean @default(true)
+  deleted Boolean @default(false)
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  deletedById String?
+
+  tags           WebtoonTag[]
+  webtoonReviews WebtoonReview[]
+
+  series       Serie[]
+  serieImages  SerieImage[]
+  serieReviews SerieReview[]
+  serieTags    SerieTag[]
+
+  followingWebtoons FollowingWebtoon[]
+  votes             WebtoonVote[]
+
+  @@unique([id, creatorId])
+  @@map("webtoons")
+}
+
+model WebtoonTag {
+  id String @id @default(uuid())
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  tagId String @db.VarChar(255)
+  tag   Tag    @relation(fields: [tagId], references: [id])
+
+  @@unique([webtoonId, tagId])
+  @@map("webtoon_tags")
+}
+
+model FollowingWebtoon {
+  id String @id @default(uuid())
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  userId String @db.VarChar(255)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, webtoonId])
+  @@map("following_webtoons")
+}
+
+model WebtoonVote {
+  id String @id @default(uuid())
+
+  vote Int @default(0)
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  userId String @db.VarChar(255)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, webtoonId])
+  @@map("webtoon_votes")
+}
+
+model WebtoonReview {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  review String @db.VarChar(2000)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@map("webtoon_reviews")
+}
+
+model Serie {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  title       String @db.VarChar(255)
+  description String @db.VarChar(2000)
+  serie       Int    @default(1)
+
+  active  Boolean @default(true)
+  deleted Boolean @default(false)
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  deletedById String?
+
+  webtoonId String
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  tags    SerieTag[]
+  images  SerieImage[]
+  reviews SerieReview[]
+
+  @@unique([id, webtoonId])
+  @@map("series")
+}
+
+model SerieImage {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  image    String  @db.VarChar(255)
+  filename String? @db.VarChar(255)
+  order    Int     @default(1)
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  serieId String @db.VarChar(255)
+  serie   Serie  @relation(fields: [serieId], references: [id])
+
+  @@map("serie_images")
+}
+
+model SerieTag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  serieId String @db.VarChar(255)
+  serie   Serie  @relation(fields: [serieId], references: [id])
+
+  tagId String @db.VarChar(255)
+  tag   Tag    @relation(fields: [tagId], references: [id])
+
+  @@unique([serieId, tagId])
+  @@map("serie_tags")
+}
+
+model SerieReview {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  webtoonId String  @db.VarChar(255)
+  webtoon   Webtoon @relation(fields: [webtoonId], references: [id])
+
+  serieId String @db.VarChar(255)
+  serie   Serie  @relation(fields: [serieId], references: [id])
+
+  review String @db.VarChar(2000)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@map("serie_reviews")
+}
