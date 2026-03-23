@@ -27,3 +27,7 @@ logs
 
 # npm
 package-lock.json
+
+api/config/local.ts
+api/config/prod.ts
+api/config/testing.ts
